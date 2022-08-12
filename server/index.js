@@ -7,6 +7,7 @@ import constants from './constants/index.js'
 import swaggerUI from 'swagger-ui-express'
 import swaggerJsDoc from 'swagger-jsdoc'
 import options from './constants/options.js'
+import Book from './models/book.js'
 
 const app = express()
 app.use(express.json())
@@ -28,6 +29,14 @@ const start = async () => {
 
         app.listen('5000', () => {
             console.log('server started...')
+        })
+        const pipeline = [
+            {
+                $match: { operationType: 'insert' }
+            }]
+
+        Book.watch(pipeline).on('change', (data) => {
+            console.log(data);
         })
 
     } catch (e) {

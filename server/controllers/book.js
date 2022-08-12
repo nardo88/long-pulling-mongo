@@ -5,8 +5,13 @@ class BookController {
     async add(req, res) {
         try {
             const { title, autor, price } = req.body
-            const book = new Book({
-                title, autor, price
+            const _id = String(Date.now())
+            console.log(_id)
+            const book = await Book.create({
+                _id,
+                title,
+                autor,
+                price
             })
 
             book.save()
@@ -29,10 +34,11 @@ class BookController {
     async getOne(req, res) {
         try {
             const { id } = req.params
-            console.log(id);
-            const book = await Book.findById(id)
+            Book.watch([{ $match: { _id: id } }]).on('change', (data) => {
+                console.log(data)
+                res.json(data)
+            })
 
-            res.json(book)
         } catch (e) {
             console.log(e)
         }
