@@ -6,7 +6,6 @@ class BookController {
         try {
             const { title, autor, price } = req.body
             const _id = String(Date.now())
-            console.log(_id)
             const book = await Book.create({
                 _id,
                 title,
@@ -34,11 +33,9 @@ class BookController {
     async getOne(req, res) {
         try {
             const { id } = req.params
-            Book.watch([{ $match: { _id: id } }]).on('change', (data) => {
-                console.log(data)
-                res.json(data)
-            })
-
+            const book = await Book.findById(id)
+            if (!book) return res.statu(404).json('not found')
+            res.json(book)
         } catch (e) {
             console.log(e)
         }
@@ -57,6 +54,14 @@ class BookController {
         } catch (e) {
             console.log(e)
         }
+    }
+
+    async subscribe(req, res) {
+        const pipeline = [{ $match: { operationType: 'insert' } }]
+        Book.watch(pipeline).on('change', (data) => {
+            console.log(data.fullDocument)
+            res.json(data.fullDocument)
+        })
     }
 }
 

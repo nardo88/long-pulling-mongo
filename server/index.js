@@ -30,14 +30,6 @@ const start = async () => {
         app.listen('5000', () => {
             console.log('server started...')
         })
-        const pipeline = [
-            {
-                $match: { operationType: 'insert' }
-            }]
-
-        Book.watch(pipeline).on('change', (data) => {
-            console.log(data);
-        })
 
     } catch (e) {
         console.log(e)

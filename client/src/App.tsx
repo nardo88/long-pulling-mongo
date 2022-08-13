@@ -9,27 +9,27 @@ interface Book {
 }
 
 function App() {
-  const [book, setBook] = useState<null | Book>(null)
+  const [books, setBooks] = useState<Book[]>([])
 
-  const subscribe: (id: string) => void = useCallback(async (id: string) => {
+  const subscribe: () => void = useCallback(async () => {
     // в блоке try мы отправляем GET запрос
     try {
       // и когда ответ придет, мы запишем его в переменную data с помощью
       // диструктуризации
-      const { data } = await axios.get<{ data: Book }>(
-        `http://localhost:5000/api/v1/book/${id}`
+      const responce = await axios.get(
+        'http://localhost:5000/api/v1/book/subscribe'
       )
       // полученные данные записываем в state
       // здесь обязательно записываем через callback
-      setBook(data.data)
+      setBooks((prev: Book[]) => [...prev, responce.data])
       // после чего снова возобновляем подписку
-      await subscribe(id)
+      await subscribe()
     } catch (e) {
       // в блок catch мы момпадаем когда по истечении долгого времени мы так
       // ничего не получили и срок запроса истек
       setTimeout(() => {
         //здесь через 0.5 сек возобновляем подписку
-        subscribe(id)
+        subscribe()
       }, 500)
     }
   }, [])
@@ -38,14 +38,25 @@ function App() {
     axios
       .get<{ data: Book[] }>('http://localhost:5000/api/v1/book')
       .then((res) => {
-        setBook(res.data.data[0])
-        return res.data.data[0]._id
+        setBooks(res.data.data)
       })
-      .then((id) => {
-        subscribe(id)
+      .then(() => {
+        subscribe()
       })
   }, [subscribe])
-  return <div className="app">{book ? <div></div> : <div></div>}</div>
+  return (
+    <div className="container">
+      {books.map((book: Book) => (
+        <div key={book._id} className="book">
+          <div className="title">
+            <h3>{book.title}</h3>
+            <p>{book.autor}</p>
+            <span>{book.price}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export default App
