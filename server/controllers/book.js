@@ -1,3 +1,4 @@
+import { emittor } from "../index.js"
 import Book from "../models/book.js"
 
 class BookController {
@@ -34,7 +35,7 @@ class BookController {
         try {
             const { id } = req.params
             const book = await Book.findById(id)
-            if (!book) return res.statu(404).json('not found')
+            if (!book) return res.status(404).json('not found')
             res.json(book)
         } catch (e) {
             console.log(e)
@@ -57,10 +58,10 @@ class BookController {
     }
 
     async subscribe(req, res) {
-        const pipeline = [{ $match: { operationType: 'insert' } }]
-        Book.watch(pipeline).on('change', (data) => {
-            console.log(data.fullDocument)
-            res.json(data.fullDocument)
+
+        emittor.once('newBook', (book) => {
+            console.log(book)
+            res.json(book)
         })
     }
 }

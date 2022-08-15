@@ -8,6 +8,10 @@ import swaggerUI from 'swagger-ui-express'
 import swaggerJsDoc from 'swagger-jsdoc'
 import options from './constants/options.js'
 import Book from './models/book.js'
+import events from 'events'
+
+export const emittor = new events.EventEmitter()
+const pipeline = [{ $match: { operationType: 'insert' } }]
 
 const app = express()
 app.use(express.json())
@@ -29,6 +33,11 @@ const start = async () => {
 
         app.listen('5000', () => {
             console.log('server started...')
+        })
+
+        Book.watch(pipeline).on('change', (data) => {
+            console.log(data.fullDocument)
+            emittor.emit('newBook', data.fullDocument)
         })
 
     } catch (e) {
