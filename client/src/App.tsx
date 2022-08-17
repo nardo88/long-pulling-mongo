@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useCallback, useEffect, useState } from 'react'
+import Form from './components/Form'
 
 interface Book {
   autor: string
@@ -17,11 +18,14 @@ function App() {
       // и когда ответ придет, мы запишем его в переменную data с помощью
       // диструктуризации
       const responce = await axios.get(
-        'http://localhost:5000/api/v1/book/subscribe'
+        'http://localhost:5000/api/v1/book/subscribe',
+        { timeout: 10000 }
       )
       // полученные данные записываем в state
       // здесь обязательно записываем через callback
-      setBooks((prev: Book[]) => [...prev, responce.data])
+      if (responce.data !== 'not message') {
+        setBooks((prev: Book[]) => [...prev, responce.data])
+      }
       // после чего снова возобновляем подписку
       await subscribe()
     } catch (e) {
@@ -46,6 +50,7 @@ function App() {
   }, [subscribe])
   return (
     <div className="container">
+      <Form />
       {books.map((book: Book) => (
         <div key={book._id} className="book">
           <div className="title">

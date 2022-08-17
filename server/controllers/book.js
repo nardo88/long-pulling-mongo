@@ -58,6 +58,9 @@ class BookController {
     }
 
     async subscribe(req, res) {
+        setTimeout(() => {
+            return res.json('not message')
+        }, 9000)
 
         emittor.once('newBook', (book) => {
             console.log(book)
