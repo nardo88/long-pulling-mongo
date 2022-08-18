@@ -58,10 +58,12 @@ class BookController {
     }
 
     async subscribe(req, res) {
+        // ждем 9 секунд и если добавления не произойдет то возвращаем сообщение
         setTimeout(() => {
             return res.json('not message')
         }, 9000)
-
+        // в проивном случае отлавливаем кастомное событие
+        // и возвращаем добавленный документ
         emittor.once('newBook', (book) => {
             console.log(book)
             res.json(book)

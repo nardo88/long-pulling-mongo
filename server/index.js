@@ -3,10 +3,6 @@ import cors from 'cors'
 import mongoose from 'mongoose'
 import router from './routers/books.js'
 import constants from './constants/index.js'
-// подключаем модули для swagger
-import swaggerUI from 'swagger-ui-express'
-import swaggerJsDoc from 'swagger-jsdoc'
-import options from './constants/options.js'
 import Book from './models/book.js'
 import events from 'events'
 
@@ -19,24 +15,20 @@ app.use(cors())
 
 app.use('/api/v1/book', router)
 
-// Проинициализируем спецификации для swagger
-const specs = swaggerJsDoc(options)
-// создаем endpoint для swagger
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(specs))
-
 const start = async () => {
     try {
         await mongoose.connect(constants.mongoUrl, {
             useUnifiedTopology: true,
             useNewUrlParser: true
         })
-
+        // запускаем сервер Express
         app.listen('5000', () => {
             console.log('server started...')
         })
-
+        // Запускаем слушатель от mongoDb на событие добавления записи в коллекцию
         Book.watch(pipeline).on('change', (data) => {
-            console.log(data.fullDocument)
+            // в случае возникновения события, вызываем кастомное событие с помощью
+            // emittor. Аргументом передаем добавленный документ в коллекцию
             emittor.emit('newBook', data.fullDocument)
         })
 
